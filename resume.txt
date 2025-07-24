@@ -1,0 +1,36 @@
+- mettre tous les includes
+- faire la fonction err() qui exit(1) et envoie "fatal error\n" sur la sortie d'erreur (2)
+- faire la fonction qui SEND() un message a tous les clients (sauf au client qui l'a envoye et le server)
+- faire le main :
+	- declarer touts les variables (6 int dont un tableau)
+	- 2 fd_set
+	- le servaddr
+	- 2 char* de 400000 carac
+	- verif le nombre d'argument
+	- creer la socket serveur avec socket AF_INET pour IPv4 et SOCK_STREAM pour TCP
+	- initialiser les fd_set et servaddr avec bzero et FD_ZERO
+	- configurer servaddr.sin_family avec AF_INET/sin_addr.s_addr avec htonl(adresseIP en decimale)/sin_port avec htons(atoi(av[1]))
+	- lie le socket a servaddr avec bind()
+	- le mettre en ecoute avec listen()
+	- ajouter le socket server au set_fd avec fd_set
+	- initialiser le max_fd avec server
+-boucle while(1) :
+	- utiliser tmp_fds avec select et donc l'initialiser avec all_fds
+	- boucler sur les fds:
+		- si le fd n'est pas dans fd_set (verif avec FD_ISSET) => skip la suite
+		- init msg_send a zero avec zero
+		- si le fd est le server => nouvelle connexion client:
+			- creer le socket client avec accept()
+			- actualiser max_fd
+			- attribuer un id unique au client
+			- le rajouter dans le fd_set
+			- envoyer un message a tous les fds pour annoncer la connection
+		- si le fd est un client:
+			- initialiser msg_rcv a zero
+			- initialiser bytes_read a 1
+			- lire bit par bit le msg envoye par le fd jusqu'a '\n' ou deconnection
+			- si le dernier bytes_read <= 0 : le client s'est deco
+				- envoyer un message pour annoncer la deco
+				- utiliser FD_CLR pour retirer le fd client du set_fd
+				- ferme le fd
+			- sinon envoyer le message a tous les autres clients
