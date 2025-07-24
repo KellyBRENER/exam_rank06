@@ -51,9 +51,9 @@ int	main(int argc, char** argv) {
 		for (int fd = 0; fd <= max_fd; fd++) {
 			if (!FD_ISSET(fd, &tmp_fds))
 				continue;
-			bzero(&msg_send, sizeof(msg_send));
+			bzero(&msg_send, 400000);
 			if (fd == server) {
-				if (client = accept(server, 0, 0) < 0)
+				if ((client = accept(server, 0, 0)) < 0)
 					err();
 				clients[client] = id++;
 				if (client > max_fd)
@@ -62,10 +62,10 @@ int	main(int argc, char** argv) {
 				sprintf(msg_send, "server: client %d just arrived\n", clients[client]);
 				send_to_all(msg_send, server, client, max_fd);
 			} else {
-				bzero(&msg_rcv, sizeof(msg_rcv));
+				bzero(&msg_rcv, 400000);
 				bytes_read = 1;
 				while (bytes_read == 1 && (!msg_rcv[0] || msg_rcv[strlen(msg_rcv) - 1] != '\n')) {
-					bytes_read = recv(fd, msg_rcv[strlen(msg_rcv)], 1, 0);
+					bytes_read = recv(fd, &msg_rcv[strlen(msg_rcv)], 1, 0);
 				}
 				if (bytes_read <= 0) {
 					sprintf(msg_send, "server: client %d just left\n", clients[fd]);
@@ -78,6 +78,6 @@ int	main(int argc, char** argv) {
 				}
 			}
 		}
-		return(0);
 	}
+	return(0);
 }
